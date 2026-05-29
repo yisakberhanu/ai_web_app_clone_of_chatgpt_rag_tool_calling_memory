@@ -1,4 +1,3 @@
-````md
 # AI Web App with RAG
 
 Build a complete AI web app with RAG using **Flask**, **OpenRouter**, **ChromaDB**, **PDF/TXT upload**, **chat memory**, and **tool calling**.
@@ -63,7 +62,24 @@ Model can call tools if needed
 Flask runs the tool
  ↓
 Final answer is returned to the chat UI
-````
+
+````md
+# AI Web App with RAG
+
+Build a complete AI web app with RAG using **Flask**, **OpenRouter**, **ChromaDB**, **PDF/TXT upload**, **chat memory**, and **tool calling**.
+
+This project shows how a modern AI assistant works behind the scenes. It can upload files, store document knowledge in ChromaDB, retrieve relevant information using RAG, remember previous conversations, and use external tools like news, date/time, and calculator.
+
+## YouTube Tutorial
+
+Watch the full step-by-step video here:
+
+[Watch on YouTube](YOUR_YOUTUBE_LINK_HERE)
+
+## Features
+
+- AI chat interface
+- Flask backend
 
 ## Simple RAG Explanation
 
