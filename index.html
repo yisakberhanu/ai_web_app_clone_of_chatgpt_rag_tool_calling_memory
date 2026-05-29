@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Flask AI Assistant</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+  <div class="app">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <span class="logo-icon">AI</span>
+          <span>Assistant</span>
+        </div>
+
+        <button class="new-chat-btn" onclick="clearChat()">
+          + New Chat
+        </button>
+      </div>
+
+      <div class="upload-card">
+        <h3>Knowledge Base</h3>
+        <p>Upload PDF or TXT files for RAG.</p>
+
+        <label for="file-upload" class="upload-box">
+          <div class="upload-icon">↑</div>
+          <span id="file-name">Choose PDF or TXT</span>
+          <small>Click to upload knowledge</small>
+        </label>
+
+        <input
+          id="file-upload"
+          type="file"
+          accept=".pdf,.txt"
+          hidden
+          onchange="uploadFile()"
+        />
+
+        <div id="upload-status" class="upload-status"></div>
+      </div>
+
+      <div class="sidebar-section">
+        <h4>Capabilities</h4>
+
+        <div class="capability">
+          <span></span>
+          RAG with ChromaDB
+        </div>
+
+        <div class="capability">
+          <span></span>
+          Chat memory
+        </div>
+
+        <div class="capability">
+          <span></span>
+          PDF/TXT upload
+        </div>
+
+        <div class="capability">
+          <span></span>
+          Tool calling
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <p>Flask + OpenRouter + ChromaDB</p>
+      </div>
+    </aside>
+
+    <!-- Main Chat Area -->
+    <main class="main">
+
+      <header class="topbar">
+        <button class="mobile-menu" onclick="toggleSidebar()">☰</button>
+
+        <div>
+          <h1>AI Assistant</h1>
+          <p>Ask questions from files, memory, or tools.</p>
+        </div>
+
+        <div class="status-pill">
+          <span></span>
+          Online
+        </div>
+      </header>
+
+      <section id="chat-box" class="chat-box">
+        <div class="welcome-screen" id="welcome-screen">
+          <div class="welcome-icon">✦</div>
+
+          <h2>How can I help you today?</h2>
+
+          <p>
+            Upload a PDF or TXT file, then ask questions. This assistant can use
+            RAG, memory, and tool calling.
+          </p>
+
+          <div class="suggestions">
+            <button onclick="sendSuggestion('Summarize the uploaded document')">
+              Summarize uploaded document
+            </button>
+
+            <button onclick="sendSuggestion('What did I tell you before?')">
+              Ask from memory
+            </button>
+
+            <button onclick="sendSuggestion('Find latest news about AI')">
+              Latest news about AI
+            </button>
+
+            <button onclick="sendSuggestion('Search the web for Flask hosting options')">
+              Web search
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <footer class="composer-wrapper">
+        <div class="composer">
+          <textarea
+            id="user-input"
+            placeholder="Message AI Assistant..."
+            rows="1"
+            oninput="autoResize(this)"
+            onkeydown="handleKeyDown(event)"
+          ></textarea>
+
+          <button id="send-btn" onclick="sendMessage()">
+            ➤
+          </button>
+        </div>
+
+        <p class="hint">
+          AI can make mistakes. Check important information.
+        </p>
+      </footer>
+
+    </main>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById("chat-box");
+    const input = document.getElementById("user-input");
+    const sendBtn = document.getElementById("send-btn");
+    const welcomeScreen = document.getElementById("welcome-screen");
+    const uploadStatus = document.getElementById("upload-status");
+    const fileName = document.getElementById("file-name");
+
+    function hideWelcome() {
+      if (welcomeScreen) {
+        welcomeScreen.style.display = "none";
+      }
+    }
+
+    function autoResize(textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = Math.min(textarea.scrollHeight, 160) + "px";
+    }
+
+    function handleKeyDown(event) {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function formatMessage(text) {
+      const safeText = escapeHtml(text);
+
+      return safeText
+        .replace(/\n/g, "<br>")
+        .replace(/```([\s\S]*?)```/g, "<pre><code>$1</code></pre>");
+    }
+
+    function addMessage(role, content) {
+      hideWelcome();
+
+      const row = document.createElement("div");
+      row.className = `message-row ${role}`;
+
+      const avatar = document.createElement("div");
+      avatar.className = `avatar ${role}`;
+      avatar.textContent = role === "user" ? "Y" : "AI";
+
+      const bubble = document.createElement("div");
+      bubble.className = "message-bubble";
+      bubble.innerHTML = formatMessage(content);
+
+      if (role === "user") {
+        row.appendChild(bubble);
+        row.appendChild(avatar);
+      } else {
+        row.appendChild(avatar);
+        row.appendChild(bubble);
+      }
+
+      chatBox.appendChild(row);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function addTyping() {
+      const row = document.createElement("div");
+      row.className = "message-row assistant";
+      row.id = "typing-indicator";
+
+      row.innerHTML = `
+        <div class="avatar assistant">AI</div>
+        <div class="message-bubble typing">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      `;
+
+      chatBox.appendChild(row);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function removeTyping() {
+      const typing = document.getElementById("typing-indicator");
+
+      if (typing) {
+        typing.remove();
+      }
+    }
+
+    async function sendMessage() {
+      const message = input.value.trim();
+
+      if (!message) return;
+
+      addMessage("user", message);
+
+      input.value = "";
+      input.style.height = "auto";
+
+      sendBtn.disabled = true;
+      addTyping();
+
+      try {
+        const response = await fetch("/chat", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message: message,
+          }),
+        });
+
+        const data = await response.json();
+
+        removeTyping();
+
+        if (!response.ok) {
+          addMessage("assistant", data.error || "Something went wrong.");
+          return;
+        }
+
+        addMessage("assistant", data.reply || "No response received.");
+      } catch (error) {
+        removeTyping();
+        addMessage("assistant", "Network error. Please check your Flask server.");
+      } finally {
+        sendBtn.disabled = false;
+        input.focus();
+      }
+    }
+
+    function sendSuggestion(text) {
+      input.value = text;
+      sendMessage();
+    }
+
+    async function uploadFile() {
+      const fileInput = document.getElementById("file-upload");
+      const file = fileInput.files[0];
+
+      if (!file) return;
+
+      fileName.textContent = file.name;
+      uploadStatus.className = "upload-status loading";
+      uploadStatus.textContent = "Uploading and indexing...";
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const response = await fetch("/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          uploadStatus.className = "upload-status error";
+          uploadStatus.textContent = data.error || "Upload failed.";
+          return;
+        }
+
+        uploadStatus.className = "upload-status success";
+        uploadStatus.textContent = data.message || "File uploaded successfully.";
+
+        addMessage(
+          "assistant",
+          `I indexed "${file.name}". You can now ask questions from this file.`
+        );
+      } catch (error) {
+        uploadStatus.className = "upload-status error";
+        uploadStatus.textContent = "Upload error. Please check your server.";
+      }
+    }
+
+    function clearChat() {
+      chatBox.innerHTML = `
+        <div class="welcome-screen" id="welcome-screen">
+          <div class="welcome-icon">✦</div>
+
+          <h2>How can I help you today?</h2>
+
+          <p>
+            Upload a PDF or TXT file, then ask questions. This assistant can use
+            RAG, memory, and tool calling.
+          </p>
+
+          <div class="suggestions">
+            <button onclick="sendSuggestion('Summarize the uploaded document')">
+              Summarize uploaded document
+            </button>
+
+            <button onclick="sendSuggestion('What did I tell you before?')">
+              Ask from memory
+            </button>
+
+            <button onclick="sendSuggestion('Find latest news about AI')">
+              Latest news about AI
+            </button>
+
+            <button onclick="sendSuggestion('Search the web for Flask hosting options')">
+              Web search
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleSidebar() {
+      document.querySelector(".sidebar").classList.toggle("open");
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+# Dev environment
+pip
+autopep8
+
+# App
+flask
+flask
+python-dotenv
+requests
+chromadb
+pypdf
+#sentence-transformers
