@@ -8,7 +8,7 @@ This project shows how a modern AI assistant works behind the scenes. It can upl
 
 Watch the full step-by-step video here:
 
-[Watch on YouTube](YOUR_YOUTUBE_LINK_HERE)
+[Watch on YouTube]([YOUR_YOUTUBE_LINK_HERE](https://youtu.be/wRrJC4LBUug?si=WVUBueb8k8fKGq2p))
 
 ## Features
 
@@ -326,7 +326,7 @@ Possible next features:
 
 Built by **Yisak Birhanu Bule**.
 
-YouTube: [Watch the tutorial](YOUR_YOUTUBE_LINK_HERE)
+YouTube: [Watch the tutorial]([YOUR_YOUTUBE_LINK_HERE](https://youtu.be/wRrJC4LBUug?si=WVUBueb8k8fKGq2p))
 
 ## License
 
