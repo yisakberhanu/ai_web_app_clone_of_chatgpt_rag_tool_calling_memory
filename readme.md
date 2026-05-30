@@ -326,7 +326,7 @@ Possible next features:
 
 Built by **Yisak Birhanu Bule**.
 
-YouTube: [Watch the tutorial]([https://youtu.be/wRrJC4LBUug?si=ViAqd3JmCy08-uMW)
+YouTube: [[Watch the tutorial]([https://youtu.be/wRrJC4LBUug?si=ViAqd3JmCy08-uMW)](https://youtu.be/wRrJC4LBUug?si=ViAqd3JmCy08-uMW)
 
 ## License
 
